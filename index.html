@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The PS Infinity Journey ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --pink-bg: #fff0f3;
+            --pink-accent: #ff4d6d;
+            --pink-soft: #ff85a1;
+            --gold: #ffb703;
+            --deep-red: #c9184a;
+            --glass: rgba(255, 255, 255, 0.95);
+        }
+
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Quicksand', sans-serif; background-color: var(--pink-bg); overflow-x: hidden; min-height: 100vh; }
+        .hidden { display: none !important; }
+        .locked-tab { display: none !important; }
+
+        /* 1. FLOATING HEARTS */
+        .heart-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .heart { position: absolute; bottom: -10vh; font-size: 2rem; animation: floatUp linear infinite; opacity: 0; }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translateY(-110vh) scale(1.2) rotate(360deg); opacity: 0; }
+        }
+
+        /* 2. NAVIGATION */
+        .tabs-nav {
+            position: fixed; top: 0; width: 100%; background: var(--glass);
+            display: flex; justify-content: center; padding: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05); z-index: 1000; gap: 10px; flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 10px 20px; border-radius: 25px; border: 2px solid var(--pink-soft);
+            background: white; color: var(--pink-soft); cursor: pointer; font-weight: bold; transition: 0.3s;
+        }
+        .tab-btn.active { background: var(--pink-accent); color: white; border-color: var(--pink-accent); transform: scale(1.1); }
+        .tab-btn.special { border-color: var(--gold); color: var(--gold); }
+
+        /* 3. MAIN CARDS */
+        .main-container { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 100px 20px 20px; position: relative; z-index: 10; }
+        .card {
+            background: var(--glass); padding: 40px; border-radius: 40px; border: 4px solid var(--pink-soft);
+            text-align: center; max-width: 900px; width: 100%; box-shadow: 0 20px 60px rgba(255, 77, 109, 0.2);
+            margin-bottom: 30px;
+        }
+
+        /* 4. UI ELEMENTS */
+        h1 { font-family: 'Pacifico', cursive; color: var(--deep-red); font-size: 2.8rem; margin-bottom: 20px; }
+        .input-box { padding: 15px; border-radius: 50px; border: 3px solid var(--pink-soft); width: 80%; max-width:300px; font-size: 1.2rem; text-align: center; outline: none; margin: 20px 0; }
+        .btn { background: var(--pink-accent); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(255, 77, 109, 0.4); }
+        .btn:hover { transform: scale(1.05); }
+
+        /* 5. GALLERY & LIGHTBOX */
+        .gallery-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+        .polaroid {
+            background: white; padding: 10px 10px 40px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transform: rotate(-2deg); transition: 0.3s; cursor: pointer;
+            display: none; /* Hidden until image loads */
+        }
+        .polaroid.visible { display: block; }
+        .polaroid:hover { transform: scale(1.1) rotate(0deg) !important; z-index: 10; }
+        .polaroid img { width: 180px; height: 180px; object-fit: cover; }
+
+        .lightbox {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 3000;
+            display: flex; justify-content: center; align-items: center;
+            cursor: zoom-out;
+        }
+        .lightbox img { max-width: 90%; max-height: 90vh; border: 5px solid white; border-radius: 10px; box-shadow: 0 0 50px rgba(255,255,255,0.2); }
+
+        /* 6. GAMES & WHEEL */
+        .game-split { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; align-items: flex-start; }
+        .ttt-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 240px; margin: 0 auto; }
+        .cell { width: 70px; height: 70px; background: white; border: 2px solid var(--pink-soft); border-radius: 15px; font-size: 2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--deep-red); }
+
+        .wheel-container { position: relative; width: 250px; height: 250px; margin: 20px auto; }
+        .wheel {
+            width: 100%; height: 100%; border-radius: 50%; border: 8px solid var(--gold);
+            background: conic-gradient(
+                #ff99c8 0% 14%, #fcf6bd 14% 28%, #d0f4de 28% 42%, #a9def9 42% 56%,
+                #e4c1f9 56% 70%, #ff99c8 70% 84%, #fcf6bd 84% 100%
+            );
+            transition: transform 3s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+        .wheel-arrow {
+            position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid var(--deep-red); z-index: 5;
+        }
+        .spin-btn-center {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 60px; height: 60px; background: white; border-radius: 50%; border: 4px solid var(--gold);
+            display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        /* 7. VAULT */
+        .vault-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
+        .mystery-box { background: white; padding: 25px; border-radius: 20px; border: 3px dashed var(--gold); }
+        .timer-display { font-size: 2rem; font-weight: bold; color: var(--pink-accent); font-family: monospace; }
+
+        .hourglass {
+            font-size: 4rem; margin: 20px 0;
+            animation: spinGlass 3s ease-in-out infinite;
+            display: inline-block;
+        }
+        @keyframes spinGlass {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(180deg); }
+            100% { transform: rotate(180deg); }
+        }
+        .vault-lock-screen { display: flex; flex-direction: column; align-items: center; }
+
+        /* 8. FUTURE CONTENT SECTION */
+        .future-card { border: 4px dashed var(--gold); background: #fffbe6; }
+        .countdown-big { font-size: 2.5rem; font-weight: bold; color: var(--pink-accent); margin: 10px 0; font-variant-numeric: tabular-nums; }
+
+        /* 9. LOCKED MESSAGE FOR PHOTOS */
+        .photo-lock-msg {
+            display: flex; flex-direction: column; align-items: center;
+            color: #888; padding: 40px;
+        }
+
+        /* 10. POPUPS & TRIGGERS */
+        .popup-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.95); z-index: 2000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 20px;
+        }
+        .popup-card {
+            background: white; padding: 40px; border-radius: 40px; border: 5px solid var(--gold);
+            max-width: 600px; box-shadow: 0 20px 60px rgba(255, 183, 3, 0.4);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* GOD MODE TRIGGER */
+        #skip-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.3; cursor: pointer; z-index: 9999; font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+
+    <div id="music-container" class="hidden">
+        <iframe id="music-frame" width="1" height="1" src="" allow="autoplay"></iframe>
+    </div>
+
+    <div id="lightbox" class="lightbox hidden" onclick="closeLightbox()">
+        <img id="lightbox-img" src="">
+    </div>
+
+    <div class="heart-container" id="heart-rain"></div>
+    <div id="skip-trigger" onclick="bypass()">😏</div>
+
+    <div id="view-gate" class="main-container">
+        <div class="card">
+            <h1>PS</h1>
+            <input type="password" id="gate-input" class="input-box" placeholder="Enter Password">
+            <br><button class="btn" onclick="enterGate()">Unlock</button>
+        </div>
+    </div>
+
+    <div id="view-proposal" class="main-container hidden">
+        <div class="card">
+            <h1>Parima...</h1>
+            <h2 style="color:var(--pink-accent); margin:20px 0;">Will You Be My Valentine? 🌹</h2>
+            <input type="text" id="prop-input" class="input-box" placeholder="Type Yes...">
+            <br><button class="btn" onclick="acceptProposal()">Yes! ❤️</button>
+        </div>
+    </div>
+
+    <div id="view-app" class="hidden">
+        <nav class="tabs-nav">
+            <button class="tab-btn active" onclick="loadTab(2021)">2021</button>
+            <button class="tab-btn" onclick="loadTab(2022)">2022</button>
+            <button class="tab-btn" onclick="loadTab(2023)">2023</button>
+            <button class="tab-btn" onclick="loadTab(2024)">2024</button>
+            <button class="tab-btn" onclick="loadTab(2025)">2025</button>
+            <button id="nav-games" class="tab-btn special locked-tab" onclick="loadTab('games')">🎮 GAMES</button>
+            <button id="nav-vault" class="tab-btn special locked-tab" onclick="loadTab('vault')">🗝️ VAULT</button>
+        </nav>
+
+        <div class="main-container">
+            <div class="card">
+
+                <div id="sect-locked" class="photo-lock-msg hidden">
+                    <div style="font-size: 5rem; margin-bottom: 20px;">🔒</div>
+                    <h2 style="color: var(--pink-soft);">Files Encrypted</h2>
+                    <p style="font-size: 1.2rem;">These memories are stored in the <b>Infinity Vault</b>.</p>
+                    <p>Unlock the Vault on <b>Valentine's Day</b> to view the photos!</p>
+                </div>
+
+                <div id="sect-gallery" class="hidden">
+                    <h1 style="color:var(--pink-accent)">Memories Unlocked!</h1>
+                    <div id="gallery-grid" class="gallery-grid"></div>
+                </div>
+
+                <div id="sect-games" class="hidden">
+                    <h1>Cupid's Arcade</h1>
+                    <div class="game-split">
+                        <div style="flex:1; text-align:left; background:#fff9f9; padding:20px; border-radius:20px;">
+                            <h3 style="color:var(--gold)">🏆 Prize Pool</h3>
+                            <ul style="font-size:0.9rem;">
+                                <li>$20 / $50 / $100 Gift Card</li>
+                                <li>Full Body Massage</li>
+                                <li>Breakfast in Bed</li>
+                                <li>Bamboozle: 5m Backrub</li>
+                                <li>Bamboozle: You Cook Dinner</li>
+                            </ul>
+                            <hr>
+                            <h3 style="text-align:center">Plays Left: <span id="plays-left">3</span></h3>
+                            <div class="ttt-board" id="ttt-board"></div>
+                            <br><button class="btn" style="width:100%; background:#777; font-size:0.9rem" onclick="resetTTT()">Reset Board</button>
+                        </div>
+                        <div style="flex:1;">
+                            <h3 style="color:var(--pink-accent)">Spin to Win!</h3>
+                            <div class="wheel-container">
+                                <div class="wheel-arrow"></div>
+                                <div class="wheel" id="wheel"></div>
+                                <div class="spin-btn-center" onclick="spinWheel()">SPIN</div>
+                            </div>
+                            <h3 id="spin-result" style="color:var(--pink-accent); min-height:40px; margin-top:10px;"></h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="sect-vault" class="hidden">
+                    <h1>The Infinity Vault</h1>
+
+                    <div id="vault-timer-state" class="vault-lock-screen hidden">
+                        <div style="font-size:3rem;">🔒</div>
+                        <div class="hourglass">⏳</div>
+                        <p style="font-size:1.2rem;">Locked until Valentine's Day</p>
+                        <div id="vault-main-timer" class="timer-display">00:00:00</div>
+                    </div>
+
+                    <div id="vault-auth" class="vault-lock-screen hidden">
+                        <div style="font-size:3rem;">🔓</div>
+                        <h2 style="color:var(--gold)">It's Time!</h2>
+                        <p style="font-size:1.1rem; color:#555;">Enter the Secret Code:</p>
+                        <input type="password" id="vault-pass" class="input-box" placeholder="******">
+                        <br><button class="btn" onclick="checkVault()">Open</button>
+                    </div>
+
+                    <div id="vault-open" class="hidden">
+                        <h3 style="color:var(--gold)">Welcome to the Future</h3>
+                        <p style="color:var(--pink-accent); margin-bottom:20px;">(All Year Photos have been Unlocked!)</p>
+                        <div class="vault-grid" id="vault-grid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="future-container" class="card future-card hidden">
+                <h1 style="color:var(--gold)">Something New is Coming...</h1>
+                <p>The next chapter of our story begins in:</p>
+                <div id="future-timer" class="countdown-big">00d 00h 00m 00s</div>
+            </div>
+
+            <div id="future-unlocked" class="card hidden" style="border-color:var(--gold); background:#fff9e6;">
+                <h1 style="color:var(--deep-red)">❤️ The Next Chapter ❤️</h1>
+                <p style="font-size:1.2rem;">(This section has automatically unlocked! You can add your next surprise, letter, or trip details here in the HTML.)</p>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="reveal-popup" class="popup-overlay hidden" onclick="closePopup()">
+        <div class="popup-card">
+            <div style="font-size: 5rem;">🎉🗝️</div>
+            <h1>ACCESS GRANTED!</h1>
+            <p style="font-size:1.2rem;">The Vault is open.</p>
+            <h3 style="color:var(--gold); margin-top:20px;">UNLOCKED:</h3>
+            <p>📸 <b>All Photo Memories (2021-2025)</b></p>
+            <p>🗝️ <b>Future Secrets</b></p>
+            <br>
+            <button class="btn" onclick="closePopup()">View Photos</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CONFIGURATION ---
+        // Target Date: Feb 14, 2026 at 00:00:00 (Midnight)
+        // This variable controls BOTH the Vault and the Future/Something New container
+        const TARGET_DATE = new Date("February 14, 2026 00:00:00").getTime();
+
+        const PRIZES = ["$20 Gift Card", "$50 Gift Card", "$100 Gift Card", "Full Body Massage", "Breakfast in Bed", "Bamboozle: You owe me a Backrub", "Bamboozle: You Cook Dinner"];
+        const DATES = ["Feb 14, 2026", "Apr 15, 2026", "Apr 19, 2026", "Sep 19, 2026", "Nov 14, 2026", "Dec 27, 2026"];
+
+        // --- 2. STATE ---
+        let state = {
+            currTab: 2021,
+            unlocked: JSON.parse(localStorage.getItem('ps_prog')) || [],
+            fullAccess: localStorage.getItem('ps_full') === 'true',
+            vaultOpen: localStorage.getItem('ps_vault') === 'true',
+            plays: parseInt(localStorage.getItem('ps_plays') || 0),
+            lastPlay: localStorage.getItem('ps_date')
+        };
+
+        // --- 3. GATE & MUSIC ---
+        function enterGate() {
+            if(document.getElementById('gate-input').value.toUpperCase() === "PS") {
+                document.getElementById('music-frame').src = "https://www.youtube.com/embed/hT_nvWreIhg?autoplay=1&loop=1&playlist=hT_nvWreIhg";
+                document.getElementById('view-gate').classList.add('hidden');
+                document.getElementById('view-proposal').classList.remove('hidden');
+            }
+        }
+
+        function acceptProposal() {
+            if(document.getElementById('prop-input').value.toLowerCase().includes("yes")) {
+                confetti();
+
+                // UNLOCK INTERFACE (Games & Tabs visible) BUT NOT CONTENT (Photos locked)
+                state.fullAccess = true;
+                localStorage.setItem('ps_full', 'true');
+
+                document.getElementById('view-proposal').classList.add('hidden');
+                document.getElementById('view-app').classList.remove('hidden');
+
+                // Load default tab
+                loadTab(2021);
+                checkFullUnlock();
+            } else { alert("Try 'Yes' 😉"); }
+        }
+
+        // --- 4. TABS & CONTENT LOCK ---
+        function loadTab(t) {
+            state.currTab = t;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('[id^="sect-"]').forEach(s => s.classList.add('hidden'));
+
+            if(typeof t === 'number') {
+                document.querySelector(`button[onclick="loadTab(${t})"]`).classList.add('active');
+
+                // CORE LOGIC: Check if Vault is Open
+                if (state.vaultOpen) {
+                    document.getElementById('sect-gallery').classList.remove('hidden');
+                    renderGallery(t);
+                } else {
+                    document.getElementById('sect-locked').classList.remove('hidden');
+                }
+
+            } else {
+                document.getElementById(`nav-${t}`).classList.add('active');
+                document.getElementById(`sect-${t}`).classList.remove('hidden');
+                if(t === 'games') initGames();
+                if(t === 'vault') manageVaultAccess();
+            }
+        }
+
+        // --- 5. GALLERY ---
+        function renderGallery(y) {
+            const grid = document.getElementById('gallery-grid'); grid.innerHTML = "";
+            for(let i=1; i<=50; i++) {
+                const d = document.createElement('div'); d.className = 'polaroid';
+                d.style.transform = `rotate(${Math.floor(Math.random()*10)-5}deg)`;
+
+                const img = document.createElement('img');
+                img.src = `${y}/${i}.JPG`;
+                img.onload = function() { d.classList.add('visible'); };
+                img.onerror = function() { d.remove(); };
+                img.onclick = function() { openLightbox(this.src); };
+
+                d.appendChild(img);
+                grid.appendChild(d);
+            }
+        }
+        function openLightbox(src) {
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox').classList.remove('hidden');
+        }
+        function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
+
+        // --- 6. GAMES ---
+        function checkFullUnlock() {
+            if(state.fullAccess) {
+                document.getElementById('nav-games').classList.remove('locked-tab');
+                document.getElementById('nav-vault').classList.remove('locked-tab');
+                checkFutureContent();
+            }
+        }
+        function closePopup() {
+            document.getElementById('reveal-popup').classList.add('hidden');
+            loadTab(2021); // Refresh tab to show photos
+        }
+
+        let tttBoard = Array(9).fill("");
+        let gameActive = true;
+        function initGames() {
+            const today = new Date().toDateString();
+            if(state.lastPlay !== today) {
+                state.plays = 0; localStorage.setItem('ps_plays', 0); localStorage.setItem('ps_date', today);
+            }
+            document.getElementById('plays-left').innerText = 3 - state.plays;
+            renderTTT();
+        }
+        function renderTTT() {
+            const b = document.getElementById('ttt-board'); b.innerHTML = "";
+            tttBoard.forEach((v, i) => {
+                const c = document.createElement('div'); c.className = 'cell'; c.innerText = v;
+                c.onclick = () => tttClick(i);
+                b.appendChild(c);
+            });
+        }
+        function tttClick(i) {
+            if(tttBoard[i] || !gameActive || state.plays >= 3) return;
+            tttBoard[i] = "O"; renderTTT();
+            if(checkWin("O")) { endGame(true); } else { setTimeout(aiMove, 400); }
+        }
+        function aiMove() {
+            let opts = tttBoard.map((v,i)=>v===""?i:null).filter(v=>v!==null);
+            if(opts.length > 0) { tttBoard[opts[0]] = "X"; renderTTT(); if(checkWin("X")) endGame(false); }
+        }
+        function checkWin(p) { return [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]].some(w => w.every(i => tttBoard[i] === p)); }
+        function endGame(win) {
+            gameActive = false;
+            if(win) {
+                confetti(); state.plays++; localStorage.setItem('ps_plays', state.plays);
+                document.getElementById('plays-left').innerText = 3 - state.plays;
+                alert("You Won! Spin the Wheel!");
+            } else { alert("Draw or Loss! Reset to try again."); }
+        }
+        function spinWheel() {
+            if(gameActive) { alert("Win Tic-Tac-Toe first!"); return; }
+            const wheel = document.getElementById('wheel');
+            const result = document.getElementById('spin-result');
+            const deg = 1080 + Math.floor(Math.random() * 360);
+            wheel.style.transform = `rotate(${deg}deg)`;
+            setTimeout(() => {
+                if(Math.random() < 0.05) {
+                    result.innerText = "🎉 WON: " + PRIZES[Math.floor(Math.random() * PRIZES.length)];
+                    confetti();
+                } else { result.innerText = "💔 Better luck next time!"; }
+            }, 3000);
+        }
+        function resetTTT() { tttBoard.fill(""); gameActive = true; document.getElementById('spin-result').innerText = ""; renderTTT(); }
+
+        // --- 7. VAULT LOGIC ---
+        function manageVaultAccess() {
+            if(state.vaultOpen) {
+                document.getElementById('vault-timer-state').classList.add('hidden');
+                document.getElementById('vault-auth').classList.add('hidden');
+                document.getElementById('vault-open').classList.remove('hidden');
+                renderVault();
+                return;
+            }
+
+            const now = new Date().getTime();
+            if(now >= TARGET_DATE) {
+                document.getElementById('vault-timer-state').classList.add('hidden');
+                document.getElementById('vault-auth').classList.remove('hidden');
+                document.getElementById('vault-open').classList.add('hidden');
+            } else {
+                document.getElementById('vault-timer-state').classList.remove('hidden');
+                document.getElementById('vault-auth').classList.add('hidden');
+                document.getElementById('vault-open').classList.add('hidden');
+                startVaultTimer();
+            }
+        }
+
+        function startVaultTimer() {
+            updateVaultDisplay();
+            setInterval(updateVaultDisplay, 1000);
+        }
+
+        function updateVaultDisplay() {
+            if(document.getElementById('vault-timer-state').classList.contains('hidden')) return;
+            const diff = TARGET_DATE - new Date().getTime();
+            if(diff <= 0) {
+                manageVaultAccess();
+            } else {
+                const d = Math.floor(diff / (1000*60*60*24));
+                const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+                const m = Math.floor((diff % (1000*60*60)) / (1000*60));
+                const s = Math.floor((diff % (1000*60)) / 1000);
+                document.getElementById('vault-main-timer').innerText = `${d}d ${h}h ${m}m ${s}s`;
+            }
+        }
+
+        function checkVault() {
+            if(document.getElementById('vault-pass').value === "271503") {
+                // UNLOCK EVERYTHING
+                state.vaultOpen = true;
+                localStorage.setItem('ps_vault', 'true');
+
+                // Also ensures unlocked list is populated
+                state.unlocked = [2021, 2022, 2023, 2024, 2025];
+                localStorage.setItem('ps_prog', JSON.stringify(state.unlocked));
+
+                confetti();
+                manageVaultAccess();
+                document.getElementById('reveal-popup').classList.remove('hidden');
+            } else { alert("Wrong code! 🔒"); }
+        }
+
+        function renderVault() {
+            const grid = document.getElementById('vault-grid'); grid.innerHTML = "";
+            DATES.forEach(d => {
+                const div = document.createElement('div'); div.className = 'mystery-box';
+                div.innerHTML = `<div id="tm-${d.replace(/\s/g,'')}">Loading...</div>`;
+                grid.appendChild(div);
+                setInterval(() => {
+                    const diff = new Date(d).getTime() - new Date().getTime();
+                    const el = document.getElementById(`tm-${d.replace(/\s/g,'')}`);
+                    if(!el) return;
+                    if(diff <= 0) el.innerText = "OPEN FOR SECRET";
+                    else {
+                        const days = Math.floor(diff / (1000*60*60*24));
+                        const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+                        const mins = Math.floor((diff % (1000*60*60)) / (1000*60));
+                        const secs = Math.floor((diff % (1000*60)) / 1000);
+                        el.innerText = `${days}d ${hours}h ${mins}m ${secs}s`;
+                    }
+                }, 1000);
+            });
+        }
+
+        // --- 8. UTILS & GOD MODE ---
+        function bypass() {
+            if(prompt("God Mode Code?") === "6969") {
+                localStorage.setItem('ps_prog', JSON.stringify([2021,2022,2023,2024,2025]));
+                localStorage.setItem('ps_full', 'true');
+                localStorage.setItem('ps_vault', 'true');
+                alert("GOD MODE ACTIVATED ⚡ Reloading...");
+                location.reload();
+            }
+        }
+
+        function checkFutureContent() {
+            setInterval(() => {
+                const now = new Date().getTime();
+                const distance = TARGET_DATE - now;
+                if (distance < 0) {
+                    document.getElementById('future-container').classList.add('hidden');
+                    document.getElementById('future-unlocked').classList.remove('hidden');
+                } else {
+                    document.getElementById('future-container').classList.remove('hidden');
+                    const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const s = Math.floor((distance % (1000 * 60)) / 1000);
+                    document.getElementById('future-timer').innerText = `${d}d ${h}h ${m}m ${s}s`;
+                }
+            }, 1000);
+        }
+
+        // Generate Hearts
+        setInterval(() => {
+            const h = document.createElement('div'); h.className = 'heart'; h.innerText = '❤️';
+            h.style.left = Math.random() * 100 + 'vw';
+            h.style.animationDuration = (Math.random() * 3 + 4) + 's';
+            document.getElementById('heart-rain').appendChild(h);
+            setTimeout(() => h.remove(), 7000);
+        }, 400);
+
+        checkFullUnlock();
+    </script>
+</body>
+</html>
